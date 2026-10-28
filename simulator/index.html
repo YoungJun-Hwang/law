@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eeedf5">
+<title>탕감액 계산기 | 법무법인 산음</title>
+<meta name="description" content="내 빚이 얼마나 줄어들 수 있는지 3분이면 확인할 수 있어요. 2026년 법원 기준(생계비·재산·최저변제액)으로 계산하는 개인회생 탕감액 계산기.">
+<meta property="og:title" content="내 빚, 얼마나 줄어들까요? | 법무법인 산음">
+<meta property="og:description" content="이름·연락처 없이 3분 만에 확인하는 개인회생 예상 탕감액">
+<!--
+  법무법인 산음 · 개인회생 탕감액 계산기 (모바일 우선)
+  - 계산 엔진(RehabCalc)은 홈페이지 계산기와 같은 기준입니다. 기준이 바뀌면 RULES만 수정하세요.
+  - 입력값은 이 화면 안에서만 계산하고 저장·전송하지 않습니다. '무료 검토 신청'을 눌러 동의한 경우에만 신청서가 메일로 전달됩니다.
+-->
+<style>
+:root {
+  color-scheme: light;
+  --ink: #191f2d;
+  --sub: #5f6a80;
+  --faint: #8d96a8;
+  --blue: #087bff;
+  --blue-dark: #0667dc;
+  --purple: #7365ff;
+  --purple-ink: #5b4de0;
+  --purple-light: #efedff;
+  --green: #22a979;
+  --green-light: #e5f7ef;
+  --warm: #fff2e4;
+  --warm-ink: #b26a22;
+  --line: #e4e7ef;
+  --page: #eeedf5;
+  --soft: #f5f6fa;
+  --radius: 28px;
+  --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.65; letter-spacing: -.03em; word-break: keep-all; overflow-wrap: break-word; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; letter-spacing: inherit; }
+button { cursor: pointer; border: 0; background: none; -webkit-tap-highlight-color: transparent; }
+button, a, summary, label, input, select { touch-action: manipulation; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { text-wrap: balance; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid #a99fff; outline-offset: 3px; border-radius: 6px; }
+
+.app { width: min(100%, 520px); margin: 0 auto; padding: 0 12px; }
+
+/* 헤더 */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 68px; padding: 0 8px; }
+.top-logo img { height: 26px; width: auto; }
+.top-tel { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #fff; color: var(--sub); font-size: 13px; font-weight: 700; }
+.top-tel svg { color: var(--purple); }
+
+/* 공통 버튼 */
+.primary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 58px; padding: 14px 20px; border-radius: 17px; background: var(--blue); color: #fff; font-size: 18px; font-weight: 750; line-height: 1.3; transition: background .2s, transform .1s; }
+.primary:hover { background: var(--blue-dark); }
+.primary:active { transform: translateY(1px); }
+.ghost { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 50px; margin-top: 8px; border-radius: 15px; color: var(--sub); font-size: 15px; font-weight: 650; }
+.ghost:hover { color: var(--blue); }
+
+/* 시작 화면 */
+.card { background: #fff; border-radius: var(--radius); padding: 28px 24px; }
+.card + .card { margin-top: 12px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--purple-light); color: var(--purple-ink); font-size: 12px; font-weight: 750; }
+.intro h1 { margin-top: 16px; font-size: clamp(28px, 7.6vw, 35px); line-height: 1.4; font-weight: 850; letter-spacing: -.06em; }
+.intro h1 em { font-style: normal; color: var(--purple); }
+.intro > p { margin-top: 10px; color: var(--sub); font-size: 15px; }
+.mascot { width: 200px; height: 200px; margin: 10px auto 4px; }
+.mascot img { width: 100%; height: 100%; object-fit: contain; animation: bob 3.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-6px); } }
+.points { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 4px 0 18px; }
+.points span { padding: 6px 11px; border-radius: 999px; background: var(--soft); color: var(--sub); font-size: 12.5px; font-weight: 650; }
+.footnote { margin-top: 12px; text-align: center; color: var(--faint); font-size: 12px; line-height: 1.8; }
+.how h2 { font-size: 19px; font-weight: 850; }
+.how ol { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 10px; }
+.how li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; padding: 14px; border-radius: 16px; background: var(--soft); }
+.how li i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; background: var(--purple-light); color: var(--purple-ink); font-style: normal; font-weight: 850; }
+.how li b { display: block; font-size: 15px; }
+.how li p { color: var(--sub); font-size: 13px; line-height: 1.7; margin-top: 2px; }
+
+/* 질문 화면 */
+.q-card { position: relative; min-height: calc(100svh - 80px); padding: 18px 24px 150px; border-radius: var(--radius) var(--radius) 0 0; background: #fff; }
+.q-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 44px; }
+.back { display: grid; place-items: center; width: 44px; height: 44px; margin-left: -10px; border-radius: 14px; font-size: 22px; color: var(--sub); }
+.back:hover { background: var(--soft); }
+.count { color: var(--faint); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.text-btn { min-height: 44px; padding: 0 4px; color: var(--sub); font-size: 13px; font-weight: 650; }
+.text-btn:hover { color: var(--blue); }
+.track { height: 6px; margin-top: 6px; border-radius: 99px; background: #eef0f6; overflow: hidden; }
+.track i { display: block; height: 100%; width: 10%; border-radius: 99px; background: linear-gradient(90deg, var(--purple), var(--blue)); transition: width .35s ease; }
+.step { padding-top: 32px; animation: rise .32s ease; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+.tag { display: inline-block; color: var(--purple); font-size: 13px; font-weight: 800; }
+.step h2 { margin-top: 6px; font-size: clamp(25px, 6.6vw, 29px); line-height: 1.42; font-weight: 850; letter-spacing: -.06em; outline: none; }
+.step-sub { margin-top: 8px; color: var(--sub); font-size: 14px; }
+.step h3 { margin-top: 30px; font-size: 17px; font-weight: 800; line-height: 1.5; }
+
+.choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 22px; }
+.choices.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choices.list { grid-template-columns: 1fr; }
+.choice { position: relative; display: block; }
+.choice input { position: absolute; opacity: 0; pointer-events: none; }
+.choice > span { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60px; padding: 10px 6px; border-radius: 16px; background: var(--soft); box-shadow: inset 0 0 0 1.5px transparent; text-align: center; font-size: 16px; font-weight: 750; line-height: 1.35; cursor: pointer; transition: background .15s, box-shadow .15s, color .15s; }
+.choice > span small { margin-top: 2px; color: var(--faint); font-size: 11.5px; font-weight: 550; }
+.choices.list .choice > span { flex-direction: row; justify-content: flex-start; gap: 14px; min-height: 68px; padding: 12px 18px; text-align: left; }
+.choices.list .choice > span i { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; background: #fff; font-style: normal; font-size: 20px; }
+.choices.list .choice > span b { display: block; font-size: 16px; }
+.choices.list .choice > span small { display: block; margin: 0; }
+.choice:hover > span { background: #eef0f7; }
+.choice input:checked + span { background: var(--purple-light); box-shadow: inset 0 0 0 2px var(--purple); color: var(--purple-ink); }
+.choice input:checked + span small { color: #8b80d9; }
+.choice input:focus-visible + span { outline: 3px solid #a99fff; outline-offset: 2px; }
+
+.money { display: block; margin-top: 22px; }
+.money > span { display: block; color: var(--sub); font-size: 14px; font-weight: 700; }
+.money > span small { margin-left: 4px; color: var(--faint); font-weight: 550; }
+.m-box { display: flex; align-items: center; gap: 8px; margin-top: 6px; padding: 0 2px; border-bottom: 2px solid var(--line); transition: border-color .2s; }
+.m-box:focus-within { border-color: var(--purple); }
+.m-box input { flex: 1; min-width: 0; padding: 8px 0; border: 0; outline: none; background: transparent; font-size: 27px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.m-box input::placeholder { color: #c9cfdb; }
+.m-box em { font-style: normal; color: var(--sub); font-size: 17px; font-weight: 750; }
+.kr { display: block; min-height: 20px; margin-top: 5px; text-align: right; color: var(--purple); font-size: 13px; font-weight: 700; }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.quick button { min-height: 36px; padding: 0 12px; border-radius: 10px; background: var(--soft); color: var(--sub); font-size: 13px; font-weight: 700; }
+.quick button:hover { background: var(--purple-light); color: var(--purple-ink); }
+.quick button.clear { margin-left: auto; background: transparent; color: var(--faint); }
+.select { display: block; margin-top: 22px; }
+.select > span { display: block; color: var(--sub); font-size: 14px; font-weight: 700; }
+.select select { width: 100%; min-height: 54px; margin-top: 6px; padding: 0 44px 0 16px; border: 0; border-radius: 15px; background: var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238d96a8' stroke-width='2.6'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 16px center no-repeat; font-size: 16px; font-weight: 650; appearance: none; -webkit-appearance: none; }
+
+.note { margin-top: 22px; padding: 15px 17px; border-radius: 16px; background: var(--soft); color: var(--sub); font-size: 13.5px; line-height: 1.8; }
+.note b { color: var(--ink); }
+.note.purple { background: var(--purple-light); color: #5f5794; }
+.note.purple b { color: var(--purple-ink); }
+.note.warm { background: var(--warm); color: #8a5a2b; }
+.note.warm b { color: var(--warm-ink); }
+.more { margin-top: 22px; border-radius: 16px; background: var(--soft); padding: 0 17px; }
+.more summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 54px; list-style: none; cursor: pointer; font-size: 14.5px; font-weight: 700; color: #48526a; }
+.more summary::-webkit-details-marker { display: none; }
+.more summary::after { content: "+"; color: var(--faint); font-size: 22px; font-weight: 500; line-height: 1; }
+.more[open] summary::after { content: "−"; }
+.more > p { color: var(--sub); font-size: 13px; line-height: 1.8; }
+.more .money { margin-top: 10px; padding-bottom: 14px; }
+
+.error { margin-top: 18px; padding: 13px 16px; border-radius: 14px; background: #fff0f1; color: #c8394a; font-size: 14px; font-weight: 650; }
+.dock { position: fixed; z-index: 30; left: 50%; bottom: var(--kb, 0px); transform: translateX(-50%); width: min(100%, 520px); padding: 22px 24px max(14px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, #ffffff00, #fff 26%); }
+
+/* 결과 */
+.r-head { padding: 12px 10px 18px; }
+.r-head h1 { margin-top: 12px; font-size: clamp(25px, 6.8vw, 30px); line-height: 1.45; font-weight: 850; letter-spacing: -.06em; }
+.r-head p { margin-top: 6px; color: var(--sub); font-size: 14px; }
+.r-tools { display: flex; gap: 8px; margin-top: 14px; }
+.r-tools button { min-height: 40px; padding: 0 14px; border-radius: 12px; background: #fff; color: var(--sub); font-size: 13px; font-weight: 700; }
+.r-tools button:hover { color: var(--blue); }
+.r-card { background: #fff; border-radius: var(--radius); padding: 26px 22px; margin-top: 12px; }
+.r-card > h2 { font-size: 19px; font-weight: 850; letter-spacing: -.045em; }
+.r-card > .sub { margin-top: 4px; color: var(--faint); font-size: 13px; }
+.hero-r { text-align: center; }
+.hero-r .mascot { width: 150px; height: 150px; margin: 0 auto; }
+.status { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 13px; border-radius: 999px; background: var(--green-light); color: var(--green); font-size: 13px; font-weight: 800; }
+.status.warm { background: var(--warm); color: var(--warm-ink); }
+.status.info { background: var(--purple-light); color: var(--purple-ink); }
+.hero-r .label { margin-top: 18px; color: var(--sub); font-size: 15px; font-weight: 700; }
+.big { margin-top: 2px; color: var(--purple); font-size: clamp(38px, 11vw, 50px); line-height: 1.2; font-weight: 850; letter-spacing: -.055em; font-variant-numeric: tabular-nums; }
+.big small { margin-left: 2px; font-size: .42em; font-weight: 750; }
+.hero-r .say { margin-top: 10px; color: var(--sub); font-size: 15px; line-height: 1.7; }
+.hero-r .say b { color: var(--ink); }
+.meter { display: flex; height: 14px; margin-top: 22px; border-radius: 99px; background: linear-gradient(90deg, #8a7dff, #b8afff); overflow: hidden; }
+.meter i { display: block; height: 100%; background: #d8dcea; border-right: 2px solid #fff; transition: width 1s ease; }
+.meter-l { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: var(--faint); font-size: 12.5px; font-weight: 650; }
+.meter-l b { color: #4c5670; }
+.meter-l b.p { color: var(--purple); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 20px 0 0; }
+.stats > div { padding: 14px 8px; border-radius: 16px; background: var(--soft); text-align: center; }
+.stats dt { color: var(--faint); font-size: 12px; font-weight: 650; }
+.stats dd { margin: 2px 0 0; font-size: 17px; font-weight: 850; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+
+.flow { margin-top: 18px; }
+.flow .before, .flow .after { border-radius: 20px; padding: 18px 16px; text-align: center; }
+.flow .before { background: var(--soft); }
+.flow .after { background: var(--purple-light); }
+.flow span { display: block; color: var(--sub); font-size: 13.5px; font-weight: 700; }
+.flow strong { display: block; margin-top: 2px; font-size: clamp(26px, 8vw, 34px); font-weight: 850; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.flow .before strong { color: #474b5c; }
+.flow .after strong { color: var(--purple); }
+.flow strong small { margin-left: 2px; font-size: 15px; font-weight: 750; }
+.flow .arrow { display: block; padding: 8px 0; text-align: center; color: #a497ff; font-size: 20px; line-height: 1; }
+.flow .after em { display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 9px; background: #fff; color: var(--purple-ink); font-size: 12.5px; font-style: normal; font-weight: 750; }
+
+.msgs { display: grid; gap: 10px; margin-top: 16px; }
+.msgs article { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 15px 16px; border-radius: 16px; background: var(--soft); }
+.msgs article > i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--purple-light); color: var(--purple-ink); font-style: normal; font-size: 14px; font-weight: 850; }
+.msgs article.warm > i { background: var(--warm); color: var(--warm-ink); }
+.msgs h3 { font-size: 14.5px; font-weight: 800; line-height: 1.55; }
+.msgs p { margin-top: 3px; color: var(--sub); font-size: 13.5px; line-height: 1.8; }
+
+.assets { margin-top: 16px; }
+.assets .total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px; border-radius: 16px; background: var(--purple-light); }
+.assets .total span { color: #5f5794; font-size: 14px; font-weight: 700; }
+.assets .total strong { color: var(--purple); font-size: 24px; font-weight: 850; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.assets ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.assets li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 13px 4px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.assets li:last-child { border: 0; }
+.assets li small { display: block; color: var(--faint); font-size: 12px; line-height: 1.6; margin-top: 1px; }
+.assets li b { flex: none; font-variant-numeric: tabular-nums; }
+.assets .empty { margin-top: 10px; color: var(--faint); font-size: 13.5px; }
+
+.basis { margin-top: 12px; border-radius: 16px; background: var(--soft); padding: 0 16px; }
+.basis summary { display: flex; align-items: center; justify-content: space-between; min-height: 52px; list-style: none; cursor: pointer; color: #48526a; font-size: 14px; font-weight: 750; }
+.basis summary::-webkit-details-marker { display: none; }
+.basis summary::after { content: "+"; color: var(--faint); font-size: 22px; font-weight: 500; }
+.basis[open] summary::after { content: "−"; }
+.basis table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 13px; }
+.basis td { padding: 8px 0; border-top: 1px solid #e6e8f0; vertical-align: top; }
+.basis td:last-child { padding-left: 12px; text-align: right; font-weight: 750; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.basis td small { display: block; color: var(--faint); font-size: 11.5px; }
+.basis tr.sum td { color: var(--purple-ink); font-weight: 850; }
+
+.lawyer { display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; }
+.lawyer img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: #eee; }
+.lawyer b { display: block; font-size: 17px; font-weight: 850; line-height: 1.45; }
+.lawyer small { display: block; color: var(--faint); font-size: 12.5px; }
+.cta-copy { margin-top: 14px; color: var(--sub); font-size: 14px; line-height: 1.8; }
+.tel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.tel-row a { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 56px; border-radius: 15px; background: var(--soft); font-size: 14.5px; font-weight: 800; line-height: 1.3; }
+.tel-row a small { color: var(--faint); font-size: 11.5px; font-weight: 650; }
+.tel-row a:hover { background: #eef0f7; }
+.prep { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.prep li { padding: 14px 16px; border-radius: 14px; background: var(--soft); color: var(--sub); font-size: 13px; line-height: 1.75; }
+.prep b { display: block; color: #3f4860; font-size: 14px; }
+.reset { display: block; margin: 20px auto 0; padding: 10px; color: var(--faint); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px; }
+.r-dock { position: fixed; z-index: 30; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 520px); padding: 22px 20px max(10px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, #eeedf500, var(--page) 24%); }
+.r-dock .ghost { min-height: 44px; margin-top: 2px; font-size: 14px; }
+
+/* 안내 · 푸터 */
+.guide { margin-top: 12px; }
+.guide h2 { font-size: 19px; font-weight: 850; }
+.faq { border-bottom: 1px solid var(--line); }
+.faq:last-child { border: 0; }
+.faq summary { display: flex; justify-content: space-between; gap: 12px; padding: 16px 0; list-style: none; cursor: pointer; font-size: 14.5px; font-weight: 700; color: #48526a; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; flex: none; color: var(--faint); font-size: 20px; line-height: 1.2; }
+.faq[open] summary::after { content: "−"; }
+.faq p { padding-bottom: 16px; color: var(--sub); font-size: 13.5px; line-height: 1.85; }
+.foot { padding: 26px 14px 36px; text-align: center; color: var(--faint); font-size: 11.5px; line-height: 1.9; }
+.foot b { color: var(--sub); font-size: 13px; }
+.foot p + p { margin-top: 8px; }
+body[data-screen=wizard] .guide, body[data-screen=wizard] .foot { display: none; }
+body[data-screen=result] .foot { padding-bottom: 150px; }
+
+/* 상담 신청 시트 */
+.sheet { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; justify-content: center; background: rgba(20, 22, 40, .42); animation: dim .2s ease; }
+@keyframes dim { from { opacity: 0; } }
+.sheet-body { width: min(100%, 520px); max-height: calc(100svh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 10px 22px max(18px, env(safe-area-inset-bottom)); border-radius: 26px 26px 0 0; background: #fff; animation: up .28s ease; }
+@keyframes up { from { transform: translateY(40px); } }
+.sheet-grip { width: 40px; height: 5px; margin: 0 auto 14px; border-radius: 9px; background: #dcdfe8; }
+.sheet h2 { font-size: 21px; font-weight: 850; letter-spacing: -.05em; }
+.sheet .sub { margin-top: 4px; color: var(--sub); font-size: 13.5px; }
+.with-result { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 12px; border-radius: 12px; background: var(--green-light); color: var(--green); font-size: 13px; font-weight: 750; }
+.f { display: block; margin-top: 14px; }
+.f > span { display: block; margin-bottom: 6px; font-size: 13.5px; font-weight: 750; }
+.f input, .f textarea { width: 100%; padding: 14px 16px; border: 0; border-radius: 13px; background: var(--soft); font-size: 16px; outline: none; box-shadow: inset 0 0 0 1.5px transparent; transition: box-shadow .2s, background .2s; }
+.f input:focus, .f textarea:focus { background: #fff; box-shadow: inset 0 0 0 1.5px var(--purple); }
+.f textarea { min-height: 128px; resize: vertical; line-height: 1.6; font-size: 14px; }
+.sheet .choices { margin-top: 0; }
+.sheet .choice > span { min-height: 50px; font-size: 15px; }
+.agree { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; font-weight: 650; }
+.agree input { width: 20px; height: 20px; accent-color: var(--purple); }
+.consent { margin-top: 8px; padding: 10px 14px; border-radius: 12px; background: var(--soft); color: var(--sub); font-size: 12.5px; }
+.consent summary { cursor: pointer; font-weight: 700; }
+.consent ul { margin: 8px 0; padding-left: 16px; }
+.sheet .primary { margin-top: 18px; }
+.toast { position: fixed; z-index: 100; left: 50%; bottom: 110px; max-width: calc(100% - 32px); padding: 13px 20px; border-radius: 14px; background: #24283a; color: #fff; font-size: 14px; font-weight: 650; text-align: center; opacity: 0; pointer-events: none; transform: translate(-50%, 16px); transition: opacity .25s, transform .25s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (min-width: 600px) {
+  body { padding-top: 10px; }
+  .card, .r-card { padding: 32px 32px; }
+  .q-card { padding-left: 34px; padding-right: 34px; border-radius: var(--radius); min-height: calc(100svh - 110px); }
+}
+@media (max-width: 360px) {
+  .app { padding: 0 8px; }
+  .tel-label { display: none; }
+  .top-tel { padding: 0 12px; }
+  .card, .r-card { padding: 24px 18px; }
+  .q-card { padding: 14px 18px 140px; }
+  .choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .choice > span { font-size: 15px; }
+  .m-box input { font-size: 24px; }
+  .stats dd { font-size: 15px; }
+  .dock { padding-left: 18px; padding-right: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media print {
+  body { background: #fff; padding: 0; }
+  .app { width: 100%; max-width: none; }
+  .top-tel, #intro, #wizard, .guide, .r-tools, .r-dock, .reset, .cta-card, .hero-r .mascot { display: none !important; }
+  .r-card { border: 1px solid #ddd; break-inside: avoid; }
+  .basis { display: block; }
+  .meter, .meter i, .flow .after, .status { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body data-screen="intro">
+<div class="app">
+  <header class="top">
+    <a class="top-logo" href="#" id="home" aria-label="계산기 처음으로"><img src="data:image/webp;base64,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" alt="법무법인 산음" width="150" height="26"></a>
+    <a class="top-tel" href="tel:025734860"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span class="tel-label">무료 상담 </span>02-573-4860</a>
+  </header>
+
+  <main>
+    <!-- 시작 -->
+    <section id="intro">
+      <div class="card intro">
+        <span class="pill">3분 탕감액 계산기</span>
+        <h1>내 빚, 얼마나<br><em>줄어들 수</em> 있을까요?</h1>
+        <p>질문 몇 개에 답하면, 법원이 실제로 보는 기준으로 예상 탕감액과 월 변제금을 알려드려요.</p>
+        <div class="mascot"><img src="data:image/webp;base64,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" alt="파란 하트를 안고 미소 짓는 새싹 캐릭터" width="200" height="200"></div>
+        <div class="points"><span>✓ 이름·연락처 없이</span><span>✓ 입력 정보 저장 안 함</span><span>✓ 2026년 기준</span></div>
+        <button type="button" class="primary" id="start">내 탕감액 알아보기 <span aria-hidden="true">→</span></button>
+        <button type="button" class="ghost" id="sample-intro">예시 결과 먼저 보기</button>
+        <p class="footnote">참고용 계산이에요. 실제 변제금과 면책 여부는<br>법원 판단에 따라 달라질 수 있어요.</p>
+      </div>
+      <div class="card how">
+        <h2>이렇게 계산해요</h2>
+        <ol>
+          <li><i>1</i><div><b>생계비를 먼저 빼요</b><p>가족 수에 맞는 기본 생계비(2026년 기준중위소득 60%)를 빼고 남는 돈으로 갚아요.</p></div></li>
+          <li><i>2</i><div><b>가진 재산만큼은 갚아요</b><p>보증금·예금·보험은 법이 보호하는 금액을 빼고 계산해요. 재산이 있다고 꼭 팔아야 하는 건 아니에요.</p></div></li>
+          <li><i>3</i><div><b>나머지는 줄어들어요</b><p>보통 3년 동안 갚고, 남은 빚은 면책받을 수 있어요. 법이 정한 최저변제액은 지켜요.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 질문 -->
+    <section id="wizard" hidden>
+      <form class="q-card" id="form" novalidate>
+        <div class="q-nav">
+          <button type="button" class="back" id="back" aria-label="이전 질문">←</button>
+          <span class="count" id="count">1 / 9</span>
+          <button type="button" class="text-btn" id="sample">예시로 채우기</button>
+        </div>
+        <div class="track" aria-hidden="true"><i id="bar"></i></div>
+
+        <section class="step" data-step="0">
+          <span class="tag">가족</span>
+          <h2 tabindex="-1">함께 사는 가족은<br>몇 명인가요?</h2>
+          <p class="step-sub">본인을 포함해서, 내 소득으로 생활하는 가족 수를 골라 주세요.</p>
+          <div class="choices" role="radiogroup" aria-label="가구원 수">
+            <label class="choice"><input type="radio" name="household" value="1" checked><span>1명<small>본인만</small></span></label>
+            <label class="choice"><input type="radio" name="household" value="2"><span>2명</span></label>
+            <label class="choice"><input type="radio" name="household" value="3"><span>3명</span></label>
+            <label class="choice"><input type="radio" name="household" value="4"><span>4명</span></label>
+            <label class="choice"><input type="radio" name="household" value="5"><span>5명</span></label>
+            <label class="choice"><input type="radio" name="household" value="6"><span>6명</span></label>
+            <label class="choice"><input type="radio" name="household" value="7"><span>7명<small>이상</small></span></label>
+          </div>
+          <p class="note purple">법원이 인정하는 기본 생계비는 <b id="living-hint">월 1,538,543원</b>이에요.<br>배우자에게 소득이 있으면 자녀는 절반만 인정되는 등, 실제 인정 인원은 달라질 수 있어요.</p>
+        </section>
+
+        <section class="step" data-step="1" hidden>
+          <span class="tag">소득</span>
+          <h2 tabindex="-1">지금 어떻게<br>돈을 벌고 계세요?</h2>
+          <div class="choices list" role="radiogroup" aria-label="소득 형태">
+            <label class="choice"><input type="radio" name="incomeType" value="salary" checked><span><i aria-hidden="true">💼</i><span><b>직장에서 월급을 받아요</b><small>정규직·계약직·아르바이트</small></span></span></label>
+            <label class="choice"><input type="radio" name="incomeType" value="business"><span><i aria-hidden="true">🏪</i><span><b>사업·프리랜서예요</b><small>자영업·용역·플랫폼 노동</small></span></span></label>
+            <label class="choice"><input type="radio" name="incomeType" value="irregular"><span><i aria-hidden="true">📆</i><span><b>소득이 일정치 않아요</b><small>일용직·달마다 다른 수입</small></span></span></label>
+            <label class="choice"><input type="radio" name="incomeType" value="none"><span><i aria-hidden="true">🌱</i><span><b>지금은 소득이 없어요</b><small>휴직·구직·질병 등</small></span></span></label>
+          </div>
+        </section>
+
+        <section class="step" data-step="2" hidden>
+          <span class="tag">소득</span>
+          <h2 tabindex="-1">한 달에 손에 쥐는 돈은<br>얼마인가요?</h2>
+          <p class="step-sub">세금·4대보험을 뺀 실수령액이에요. 달마다 다르면 최근 몇 달 평균으로 적어 주세요.</p>
+          <label class="money"><span>월 평균 실수령액</span><div class="m-box"><input data-k="income" inputmode="numeric" placeholder="0" autocomplete="off" enterkeyhint="next"><em>만원</em></div><small class="kr"></small></label>
+          <div class="quick" data-for="income"><button type="button" data-add="10">+10만</button><button type="button" data-add="50">+50만</button><button type="button" data-add="100">+100만</button><button type="button" class="clear" data-add="0">지우기</button></div>
+          <details class="more">
+            <summary>월세·치료비·교육비가 많이 나가나요?</summary>
+            <p>기본 생계비 외에 꼭 필요한 비용은 자료를 내면 추가로 인정받을 수 있어요. 대략적인 월 금액을 적어 주세요.</p>
+            <label class="money"><span>추가로 필요한 생계비<small>선택</small></span><div class="m-box"><input data-k="extraLiving" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+          </details>
+        </section>
+
+        <section class="step" data-step="3" hidden>
+          <span class="tag">빚</span>
+          <h2 tabindex="-1">갚아야 할 빚은<br>모두 얼마인가요?</h2>
+          <p class="step-sub">카드값·신용대출·현금서비스·사채·보증채무를 이자까지 합쳐 주세요. 집·차 담보대출은 뒤에서 따로 물어볼게요.</p>
+          <label class="money"><span>담보 없는 빚 합계</span><div class="m-box"><input data-k="unsecured" inputmode="numeric" placeholder="0" autocomplete="off" enterkeyhint="next"><em>만원</em></div><small class="kr"></small></label>
+          <div class="quick" data-for="unsecured"><button type="button" data-add="100">+100만</button><button type="button" data-add="1000">+1,000만</button><button type="button" data-add="10000">+1억</button><button type="button" class="clear" data-add="0">지우기</button></div>
+          <details class="more">
+            <summary>밀린 세금이나 건강보험료가 있나요?</summary>
+            <p>세금·4대보험 체납액은 줄어들지 않고 변제기간 안에 모두 갚아야 해요.</p>
+            <label class="money"><span>세금·4대보험 체납액<small>선택</small></span><div class="m-box"><input data-k="priority" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+          </details>
+        </section>
+
+        <section class="step" data-step="4" hidden>
+          <span class="tag">재산 · 집</span>
+          <h2 tabindex="-1">지금 사는 집은<br>어떤 형태인가요?</h2>
+          <div class="choices list" role="radiogroup" aria-label="주거 형태">
+            <label class="choice"><input type="radio" name="housing" value="lease" checked><span><i aria-hidden="true">🔑</i><span><b>전세·월세예요</b><small>보증금을 맡겨 두었어요</small></span></span></label>
+            <label class="choice"><input type="radio" name="housing" value="own"><span><i aria-hidden="true">🏠</i><span><b>내 집이에요</b><small>본인 명의 자가 주택</small></span></span></label>
+            <label class="choice"><input type="radio" name="housing" value="other"><span><i aria-hidden="true">👨‍👩‍👧</i><span><b>가족 집 등 그 밖이에요</b><small>보증금이 없어요</small></span></span></label>
+          </div>
+          <label class="select" id="region-field"><span>사는 지역</span><select data-k="region" aria-label="사는 지역">
+            <option value="seoul">서울특별시</option>
+            <option value="dense">부천·인천·수원·성남·고양 등 수도권</option>
+            <option value="dense">세종·용인·화성·김포</option>
+            <option value="metro">부산·대구·광주·대전·울산 광역시</option>
+            <option value="metro">안산·광주(경기)·파주·이천·평택</option>
+            <option value="other">그 밖의 지역</option>
+          </select></label>
+          <div id="lease-field">
+            <label class="money"><span>전·월세 보증금</span><div class="m-box"><input data-k="leaseDeposit" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+            <p class="note purple" id="lease-hint">지역별 소액임차 보호액만큼은 재산에서 빼고 계산해요.</p>
+          </div>
+        </section>
+
+        <section class="step" data-step="5" hidden>
+          <span class="tag">재산 · 부동산</span>
+          <h2 tabindex="-1">본인 명의 집이나 땅이<br>있나요?</h2>
+          <div class="choices two" role="radiogroup" aria-label="부동산 보유">
+            <label class="choice"><input type="radio" name="hasHome" value="yes"><span>있어요</span></label>
+            <label class="choice"><input type="radio" name="hasHome" value="no" checked><span>없어요</span></label>
+          </div>
+          <div id="home-fields" hidden>
+            <label class="money"><span>지금 시세</span><div class="m-box"><input data-k="homeValue" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+            <label class="money"><span>남은 담보대출</span><div class="m-box"><input data-k="homeLoan" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+            <p class="note">시세에서 담보대출을 뺀 <b>순재산</b>만 계산에 넣어요. 담보대출은 탕감 대상이 아니라 따로 갚아야 해요.</p>
+          </div>
+        </section>
+
+        <section class="step" data-step="6" hidden>
+          <span class="tag">재산 · 자동차</span>
+          <h2 tabindex="-1">본인 명의 자동차가<br>있나요?</h2>
+          <div class="choices two" role="radiogroup" aria-label="자동차 보유">
+            <label class="choice"><input type="radio" name="hasCar" value="yes"><span>있어요</span></label>
+            <label class="choice"><input type="radio" name="hasCar" value="no" checked><span>없어요</span></label>
+          </div>
+          <div id="car-fields" hidden>
+            <label class="money"><span>중고차 시세</span><div class="m-box"><input data-k="carValue" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+            <label class="money"><span>남은 할부·담보</span><div class="m-box"><input data-k="carLoan" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+            <p class="note">출퇴근이나 생계에 꼭 필요한 차라면 상담에서 함께 이야기해요.</p>
+          </div>
+        </section>
+
+        <section class="step" data-step="7" hidden>
+          <span class="tag">재산 · 돈</span>
+          <h2 tabindex="-1">통장에 있는 돈과<br>투자한 돈을 알려 주세요.</h2>
+          <p class="step-sub">없으면 비워 두고 다음으로 넘어가세요.</p>
+          <label class="money"><span>예금·현금</span><div class="m-box"><input data-k="cash" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+          <label class="money"><span>주식·코인<small>지금 평가액</small></span><div class="m-box"><input data-k="investments" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+          <p class="note purple">예금은 <b>250만원</b>까지 압류금지 생계비로 보호돼요. 주식·코인은 <b>지금 평가액</b>만 보고, 투자로 잃은 돈은 반영하지 않아요.</p>
+        </section>
+
+        <section class="step" data-step="8" hidden>
+          <span class="tag">재산 · 그 밖에</span>
+          <h2 tabindex="-1">마지막이에요!<br>보험·퇴직금도 있나요?</h2>
+          <p class="step-sub">모르면 비워 두셔도 괜찮아요. 상담에서 함께 확인해요.</p>
+          <label class="money"><span>보험 해약환급금</span><div class="m-box"><input data-k="insurance" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+          <label class="money"><span>지금 퇴사하면 받을 퇴직금</span><div class="m-box"><input data-k="retirement" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+          <label class="money"><span>그 밖의 재산<small>받을 돈·사업 설비 등</small></span><div class="m-box"><input data-k="otherAssets" inputmode="numeric" placeholder="0" autocomplete="off"><em>만원</em></div><small class="kr"></small></label>
+          <p class="note purple">보장성보험 환급금은 <b>150만원</b>까지 보호되고, 퇴직금은 <b>절반</b>만 재산으로 봐요.</p>
+        </section>
+
+        <div class="error" id="error" role="alert" hidden></div>
+        <div class="dock"><button type="submit" class="primary" id="next">다음</button></div>
+      </form>
+    </section>
+
+    <!-- 결과 -->
+    <section id="result" aria-live="polite" hidden></section>
+
+    <section class="card guide" id="guide">
+      <h2>자주 묻는 질문</h2>
+      <details class="faq"><summary>재산이 있으면 꼭 팔아야 하나요?</summary><p>아니에요. 개인회생은 재산을 팔지 않고, 재산 가치(청산가치)만큼을 변제기간 동안 나눠 갚는 방식이에요. 그래서 재산이 많으면 월 변제금이나 기간이 늘어날 수 있어요.</p></details>
+      <details class="faq"><summary>계산 결과가 실제와 같나요?</summary><p>2026년 기준중위소득, 채무자회생법 최저변제액, 주택임대차보호법 소액임차 보호액, 압류금지 예금·보험 기준으로 계산했지만, 실제 인정 생계비·재산 평가·관할 법원 실무에 따라 달라질 수 있어요.</p></details>
+      <details class="faq"><summary>입력한 정보는 어디에 저장되나요?</summary><p>어디에도 저장하거나 보내지 않아요. 화면을 닫으면 사라져요. ‘무료 검토 신청’을 직접 눌러 동의한 경우에만 신청서가 변호사에게 전달돼요.</p></details>
+      <details class="faq"><summary>소득이 없어도 신청할 수 있나요?</summary><p>개인회생은 꾸준한 소득이 있어야 해요. 지금 소득이 없다면 개인파산·면책을 먼저 검토해 볼 수 있어요. 계산 결과에서 함께 안내해 드려요.</p></details>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <b>법무법인 산음</b>
+    <p>대표변호사 김준희 · 사업자등록번호 257-57-02279<br>서울사무소 서초구 강남대로 212 보은빌딩 5층 · 02-573-4860<br>부천사무소 원미구 상일로 126 뉴법조타운 3층 · 032-325-4864<br>상담시간 평일 09:00 ~ 18:00 (점심 11:45 ~ 12:45)</p>
+    <p>이 계산 결과는 일반적인 법률 정보이며 구체적인 사안에 대한 법률 자문이나 결과 보장이 아닙니다.</p>
+  </footer>
+</div>
+
+<!-- 상담 신청 시트 -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+  <form class="sheet-body" id="consult" novalidate>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="sheet-title">무료로 검토받기</h2>
+    <p class="sub">남겨 주시면 변호사가 직접 연락드릴게요. 상담은 무료예요.</p>
+    <div class="with-result" id="with-result"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>계산 결과가 함께 전달돼요</div>
+    <label class="f"><span>이름</span><input name="name" placeholder="홍길동" autocomplete="name"></label>
+    <label class="f"><span>연락처</span><input name="tel" type="tel" inputmode="numeric" placeholder="010-0000-0000" autocomplete="tel"></label>
+    <div class="f"><span>가까운 사무소</span>
+      <div class="choices two">
+        <label class="choice"><input type="radio" name="office" value="서울" checked><span>서울 (양재)</span></label>
+        <label class="choice"><input type="radio" name="office" value="부천"><span>부천</span></label>
+      </div>
+    </div>
+    <label class="f"><span>하고 싶은 이야기 <small style="font-weight:500;color:var(--faint)">선택</small></span><textarea name="msg" placeholder="상황을 편하게 적어 주세요."></textarea></label>
+    <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+    <label class="agree"><input type="checkbox" name="agree"> 개인정보 수집·이용에 동의해요 (필수)</label>
+    <details class="consent">
+      <summary>수집·이용 안내 보기</summary>
+      <ul>
+        <li>목적: 상담 신청 접수, 상담을 위한 연락</li>
+        <li>항목: 필수 이름·연락처 · 선택 희망 사무소·상담 내용(계산 결과 포함)</li>
+        <li>보유 기간: 상담 신청일로부터 1년 (요청 시 즉시 파기)</li>
+        <li>국외 이전: 신청서 전달을 위해 이메일 전송 서비스(FormSubmit)를 거쳐 국외로 이전돼요</li>
+        <li>거부 권리: 동의하지 않으셔도 되며, 이 경우 전화로 상담하실 수 있어요</li>
+      </ul>
+    </details>
+    <button type="submit" class="primary">상담 신청하기</button>
+    <button type="button" class="ghost" id="sheet-close">닫기</button>
+  </form>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/*
+ * 법무법인 산음 — 개인회생 예상 탕감액 계산 엔진 (홈페이지 계산기와 동일)
+ * 모든 금액은 원 단위. 기준값은 RULES 한 곳에서만 관리합니다.
+ * 기준이 바뀌면(매년 기준중위소득 고시, 시행령 개정 등) RULES만 수정하세요.
+ */
+(function (root) {
+  'use strict';
+
+  var RULES = {
+    year: 2026,
+    // 보건복지부 2026년 기준중위소득(월, 1~6인). 7인 이상은 6인-5인 차액을 1인당 가산.
+    medianIncome: [2564238, 4199292, 5359036, 6494738, 7556719, 8555952],
+    livingRate: 0.6,                // 법원 실무상 기본 생계비 = 기준중위소득 60%
+    baseMonths: 36,                 // 원칙 변제기간
+    maxMonths: 60,                  // 청산가치 보장 등을 위한 최대 연장
+    limits: { unsecured: 1000000000, secured: 1500000000 }, // 무담보 10억 / 담보 15억
+    // 최저변제액(채무자회생법 시행령): 무담보 5천만원 미만 5%, 이상 3% + 100만원
+    minRepay: function (unsecured) {
+      return unsecured < 50000000 ? unsecured * 0.05 : unsecured * 0.03 + 1000000;
+    },
+    // 주택임대차보호법 소액임차인 최우선변제(보증금 상한 이하일 때 보호액 공제)
+    lease: {
+      seoul:   { label: '서울특별시', limit: 165000000, protect: 55000000 },
+      dense:   { label: '과밀억제권역(부천·인천 대부분·수원·성남·고양 등), 세종·용인·화성·김포', limit: 145000000, protect: 48000000 },
+      metro:   { label: '광역시(과밀억제권역 제외), 안산·광주·파주·이천·평택', limit: 85000000, protect: 28000000 },
+      other:   { label: '그 밖의 지역', limit: 75000000, protect: 25000000 }
+    },
+    cashExempt: 2500000,            // 압류금지 예금·현금(2026.2.1. 시행 생계비 보호 250만원)
+    insuranceExempt: 1500000,       // 보장성보험 해약환급금 압류금지 범위
+    retirementRate: 0.5             // 예상 퇴직금 중 청산가치 반영 비율
+  };
+
+  function livingCost(household) {
+    var h = Math.max(1, Math.floor(household || 1));
+    var m = RULES.medianIncome;
+    var median = h <= 6 ? m[h - 1] : m[5] + (m[5] - m[4]) * (h - 6);
+    return Math.round(median * RULES.livingRate);
+  }
+
+  function n(v) { v = Number(v); return isFinite(v) && v > 0 ? v : 0; }
+
+  function calculate(input) {
+    var x = {};
+    ['household', 'income', 'extraLiving', 'unsecured', 'priority', 'leaseDeposit', 'homeValue', 'homeLoan',
+     'carValue', 'carLoan', 'cash', 'investments', 'insurance', 'retirement', 'otherAssets']
+      .forEach(function (k) { x[k] = n(input[k]); });
+    x.household = Math.max(1, Math.floor(x.household || 1));
+    x.incomeType = input.incomeType || 'salary';
+    x.region = RULES.lease[input.region] ? input.region : 'seoul';
+
+    // 1) 생계비와 월 가용소득
+    var baseLiving = livingCost(x.household);
+    var living = baseLiving + x.extraLiving;
+    var disposable = Math.max(0, x.income - living);
+
+    // 2) 청산가치
+    var lease = RULES.lease[x.region];
+    var leaseProtected = x.leaseDeposit > 0 && x.leaseDeposit <= lease.limit ? Math.min(x.leaseDeposit, lease.protect) : 0;
+    var items = [
+      { key: 'lease', label: '임차보증금', gross: x.leaseDeposit, deduct: leaseProtected,
+        note: leaseProtected ? lease.label + ' 소액임차 보호액 공제' : (x.leaseDeposit ? '소액임차 보증금 상한 초과 → 공제 없음' : '') },
+      { key: 'home', label: '부동산(시세−담보대출)', gross: Math.max(0, x.homeValue - x.homeLoan), deduct: 0, note: '' },
+      { key: 'car', label: '자동차(시세−할부·담보)', gross: Math.max(0, x.carValue - x.carLoan), deduct: 0, note: '' },
+      { key: 'cash', label: '예금·현금', gross: x.cash, deduct: Math.min(x.cash, RULES.cashExempt), note: '압류금지 생계비 공제' },
+      { key: 'invest', label: '주식·코인(현재 평가액)', gross: x.investments, deduct: 0, note: '' },
+      { key: 'insurance', label: '보험 해약환급금', gross: x.insurance, deduct: Math.min(x.insurance, RULES.insuranceExempt), note: '보장성보험 압류금지 범위 공제' },
+      { key: 'retire', label: '예상 퇴직금', gross: x.retirement, deduct: x.retirement * (1 - RULES.retirementRate), note: '1/2만 반영' },
+      { key: 'other', label: '기타 재산', gross: x.otherAssets, deduct: 0, note: '' }
+    ];
+    var liquidation = 0;
+    items.forEach(function (it) { it.value = Math.max(0, it.gross - it.deduct); liquidation += it.value; });
+
+    // 3) 변제해야 할 최소 총액
+    var secured = x.homeLoan + x.carLoan;
+    var fullDebt = x.unsecured + x.priority;
+    var minRepay = x.unsecured > 0 ? Math.min(x.unsecured, RULES.minRepay(x.unsecured)) : 0;
+    // 파산 시 우선채권이 먼저 배당되므로 일반채권자 몫의 청산가치는 그만큼 차감
+    var liquidationForGeneral = Math.max(0, liquidation - x.priority);
+    var requiredGeneral = Math.min(x.unsecured, Math.max(liquidationForGeneral, minRepay));
+    var requiredTotal = x.priority + requiredGeneral;
+
+    var r = {
+      rules: RULES, input: x, baseLiving: baseLiving, living: living, disposable: disposable,
+      items: items, liquidation: liquidation, minRepay: minRepay, requiredTotal: requiredTotal,
+      secured: secured, fullDebt: fullDebt, flags: []
+    };
+
+    // 4) 신청 가능성 판단
+    if (fullDebt <= 0) { r.status = 'nodebt'; return r; }
+    if (x.unsecured > RULES.limits.unsecured || secured > RULES.limits.secured) r.flags.push('limit');
+    if (x.incomeType === 'none' || x.income <= 0) { r.status = 'bankruptcy'; r.reason = 'noincome'; return finish(r); }
+    if (disposable <= 0) { r.status = 'bankruptcy'; r.reason = 'nodisposable'; return finish(r); }
+
+    if (disposable * RULES.baseMonths >= fullDebt) {
+      // 3년 안에 전액 변제 가능 → 감면 효과 없음
+      r.status = 'fullpay';
+      r.months = Math.max(1, Math.ceil(fullDebt / disposable));
+      r.total = fullDebt;
+    } else if (disposable * RULES.baseMonths >= requiredTotal) {
+      r.status = 'ok';
+      r.months = RULES.baseMonths;
+      r.total = disposable * RULES.baseMonths;
+    } else {
+      var months = Math.ceil(requiredTotal / disposable);
+      if (months <= RULES.maxMonths) {
+        r.status = 'extended';
+        r.months = months;
+        r.total = Math.min(fullDebt, disposable * months);
+      } else {
+        r.status = 'shortfall';
+        r.months = RULES.maxMonths;
+        r.total = requiredTotal;
+        r.neededMonthly = requiredTotal / RULES.maxMonths;
+        r.gapMonthly = r.neededMonthly - disposable;
+      }
+    }
+    r.monthly = r.total / r.months;
+    r.paidGeneral = Math.max(0, r.total - x.priority);
+    r.forgiven = Math.max(0, x.unsecured - r.paidGeneral);
+    r.rate = x.unsecured > 0 ? r.forgiven / x.unsecured : 0;
+    return finish(r);
+  }
+
+  function finish(r) {
+    var x = r.input;
+    if (x.incomeType === 'irregular') r.flags.push('irregular');
+    if (x.investments > 0) r.flags.push('invest');
+    if (x.priority > 0) r.flags.push('priority');
+    if (r.secured > 0) r.flags.push('secured');
+    if (x.extraLiving > 0) r.flags.push('extra');
+    if (x.household >= 2) r.flags.push('household');
+    if (r.status === 'bankruptcy') r.bankruptcyDebt = r.fullDebt;
+    return r;
+  }
+
+  var api = { RULES: RULES, livingCost: livingCost, calculate: calculate };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.RehabCalc = api;
+})(this);
+</script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var C = window.RehabCalc;
+  var form = $('#form'), result = $('#result'), error = $('#error');
+  var steps = $$('.step', form), current = 0, last = null;
+  var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- 금액 표기 ---------- */
+  function won(v) { return Math.round(v).toLocaleString('ko-KR') + '원'; }
+  function kr(v) { // 원 → "1억 2,300만원"
+    v = Math.round(v); if (v <= 0) return '0원';
+    var eok = Math.floor(v / 1e8), man = Math.floor(v % 1e8 / 1e4), rest = v % 1e4, out = [];
+    if (eok) out.push(eok.toLocaleString('ko-KR') + '억');
+    if (man) out.push(man.toLocaleString('ko-KR') + '만');
+    if (!eok && !man) out.push(rest.toLocaleString('ko-KR'));
+    return out.join(' ') + '원';
+  }
+  function approx(v) { return kr(Math.round(v / 1e4) * 1e4); } // 만원 단위 반올림
+  function big(v) { return approx(v).replace(/(만?원)$/, '<small>$1</small>'); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ---------- 화면 전환 ---------- */
+  function screen(name) {
+    document.body.dataset.screen = name;
+    $('#intro').hidden = name !== 'intro';
+    $('#wizard').hidden = name !== 'wizard';
+    result.hidden = name !== 'result';
+    window.scrollTo(0, 0);
+  }
+  function radio(name, scope) { var el = $('input[name="' + name + '"]:checked', scope || form); return el ? el.value : ''; }
+  function setRadio(name, value) { var el = $('input[name="' + name + '"][value="' + value + '"]', form); if (el) el.checked = true; }
+
+  // 소득이 없으면 실수령액 질문은 건너뛰어요.
+  function skipped(i) { return i === 2 && radio('incomeType') === 'none'; }
+  function visibleSteps() { return steps.filter(function (s, i) { return !skipped(i); }); }
+
+  function sync() {
+    $('#living-hint').textContent = '월 ' + won(C.livingCost(Number(radio('household'))));
+    var housing = radio('housing');
+    $('#lease-field').hidden = housing !== 'lease';
+    $('#home-fields').hidden = radio('hasHome') !== 'yes';
+    $('#car-fields').hidden = radio('hasCar') !== 'yes';
+    var lease = C.RULES.lease[val('region')];
+    $('#lease-hint').innerHTML = '이 지역은 보증금 <b>' + approx(lease.limit) + '</b> 이하일 때 <b>' + approx(lease.protect) + '</b>까지 보호돼요. 보호되는 금액은 재산에서 빼고 계산해요.';
+  }
+
+  function go(n, focus) {
+    current = n; sync();
+    steps.forEach(function (s, i) { s.hidden = i !== n; });
+    var vis = visibleSteps(), pos = vis.indexOf(steps[n]) + 1;
+    $('#count').textContent = pos + ' / ' + vis.length;
+    $('#bar').style.width = (pos / vis.length * 100) + '%';
+    $('#next').textContent = n === steps.length - 1 ? '내 탕감액 확인하기' : '다음';
+    error.hidden = true;
+    if (focus !== false) { window.scrollTo(0, 0); $('h2', steps[n]).focus({ preventScroll: true }); }
+  }
+  function nextIndex(n) { n++; while (n < steps.length && skipped(n)) n++; return n; }
+  function prevIndex(n) { n--; while (n > 0 && skipped(n)) n--; return n; }
+
+  function validate(n) {
+    if (n === 2 && val('income') <= 0) return '월 실수령액을 입력해 주세요. 소득이 없다면 이전 화면에서 "지금은 소득이 없어요"를 골라 주세요.';
+    if (n === 3 && val('unsecured') + val('priority') <= 0) return '빚 금액을 입력해 주세요.';
+    if (n === 5 && radio('hasHome') === 'yes' && val('homeValue') <= 0) return '집이나 땅의 시세를 입력해 주세요. 없다면 "없어요"를 골라 주세요.';
+    if (n === 6 && radio('hasCar') === 'yes' && val('carValue') <= 0) return '자동차 시세를 입력해 주세요. 없다면 "없어요"를 골라 주세요.';
+    return '';
+  }
+  function showError(m) { error.textContent = m; error.hidden = false; }
+
+  $('#start').addEventListener('click', function () { screen('wizard'); go(current); });
+  $('#back').addEventListener('click', function () { if (current > 0) go(prevIndex(current)); else screen('intro'); });
+  $('#home').addEventListener('click', function (e) { e.preventDefault(); screen('intro'); });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var m = validate(current); if (m) return showError(m);
+    if (current === steps.length - 1) compute();
+    else go(nextIndex(current));
+  });
+  form.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); $('#next').click(); }
+  });
+  form.addEventListener('change', function (e) {
+    sync();
+    // 자가에 산다고 고르면 부동산 질문에 미리 '있어요'를 표시해요.
+    if (e.target.name === 'housing' && e.target.value === 'own') setRadio('hasHome', 'yes');
+    if (e.target.name === 'housing') sync();
+  });
+  // 선택형 질문은 손가락·마우스로 고르면(이미 선택된 항목이어도) 바로 다음으로 넘어가요. 키보드 화살표 이동은 그대로예요.
+  var tapped = false;
+  form.addEventListener('pointerdown', function (e) { tapped = !!e.target.closest('.choice'); });
+  form.addEventListener('click', function (e) {
+    var t = e.target;
+    if (tapped && t.type === 'radio' && (t.name === 'household' || t.name === 'incomeType')) {
+      tapped = false;
+      setTimeout(function () { if (!$('#wizard').hidden && steps[current].contains(t)) $('#next').click(); }, 220);
+    }
+  });
+
+  /* ---------- 금액 입력 ---------- */
+  function hint(el) {
+    var d = el.value.replace(/[^\d]/g, '');
+    var h = el.closest('.money').querySelector('.kr'); if (h) h.textContent = d ? kr(Number(d) * 1e4) : '';
+  }
+  function setMoney(el, man) { el.value = man > 0 ? Number(man).toLocaleString('ko-KR') : ''; hint(el); }
+  $$('input[data-k]', form).forEach(function (el) {
+    el.addEventListener('input', function () {
+      var d = el.value.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '').slice(0, 7);
+      el.value = d ? Number(d).toLocaleString('ko-KR') : '';
+      hint(el);
+    });
+  });
+  $$('.quick').forEach(function (box) {
+    var el = $('[data-k="' + box.dataset.for + '"]', form);
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var add = Number(b.dataset.add);
+      var now = Number(el.value.replace(/[^\d]/g, '')) || 0;
+      setMoney(el, add ? Math.min(9999999, now + add) : 0);
+    });
+  });
+  function val(k) {
+    var el = $('[data-k="' + k + '"]', form); if (!el) return 0;
+    if (el.tagName === 'SELECT') return el.value;
+    return (Number(el.value.replace(/[^\d]/g, '')) || 0) * 1e4;
+  }
+
+  /* ---------- 계산과 결과 ---------- */
+  function readInput() {
+    var housing = radio('housing'), home = radio('hasHome') === 'yes', car = radio('hasCar') === 'yes', noIncome = radio('incomeType') === 'none';
+    return {
+      household: Number(radio('household')), incomeType: radio('incomeType'),
+      income: noIncome ? 0 : val('income'), extraLiving: noIncome ? 0 : val('extraLiving'),
+      unsecured: val('unsecured'), priority: val('priority'), region: val('region'),
+      leaseDeposit: housing === 'lease' ? val('leaseDeposit') : 0,
+      homeValue: home ? val('homeValue') : 0, homeLoan: home ? val('homeLoan') : 0,
+      carValue: car ? val('carValue') : 0, carLoan: car ? val('carLoan') : 0,
+      cash: val('cash'), investments: val('investments'), insurance: val('insurance'),
+      retirement: val('retirement'), otherAssets: val('otherAssets')
+    };
+  }
+  function compute() {
+    for (var i = 0; i < steps.length; i++) {
+      if (skipped(i)) continue;
+      var m = validate(i); if (m) { screen('wizard'); go(i); return showError(m); }
+    }
+    last = C.calculate(readInput());
+    render(last);
+  }
+
+  var NOTES = {
+    limit: ['일반회생 검토가 필요해요', '담보 없는 빚 10억원 또는 담보 있는 빚 15억원을 넘으면 개인회생 대신 일반회생을 검토해야 해요.'],
+    irregular: ['소득 자료를 준비해 주세요', '소득이 일정치 않으면 최근 1년 소득 자료로 평균을 소명해야 해요. 금액이 달라질 수 있어요.'],
+    invest: ['주식·코인은 지금 평가액만 봤어요', '투자로 잃은 돈은 서울회생법원 실무상 반영하지 않아요.'],
+    priority: ['세금·4대보험은 줄어들지 않아요', '체납액은 변제기간 안에 모두 갚아야 해서 변제금에 포함했어요.'],
+    secured: ['담보대출은 따로 갚아요', '집·차 담보대출은 계산에서 빼고, 담보를 뺀 순재산만 반영했어요.'],
+    extra: ['추가 생계비는 소명이 필요해요', '자료로 필요성을 소명해야 인정돼요. 인정되지 않으면 월 변제금이 늘어날 수 있어요.'],
+    household: ['부양가족 인정 인원을 확인해요', '배우자 소득, 실제 부양 여부에 따라 법원이 인정하는 인원이 달라질 수 있어요.']
+  };
+
+  function msg(title, body, warm) {
+    return '<article' + (warm ? ' class="warm"' : '') + '><i aria-hidden="true">' + (warm ? '!' : 'i') + '</i><div><h3>' + title + '</h3><p>' + body + '</p></div></article>';
+  }
+
+  function basisTable(r) {
+    var x = r.input, rows = '';
+    rows += '<tr><td>기본 생계비<small>' + (x.household >= 7 ? '7명 이상' : x.household + '명') + ' 가구 · 2026년 기준중위소득 60%</small></td><td>' + won(r.baseLiving) + '</td></tr>';
+    if (x.extraLiving) rows += '<tr><td>추가 생계비<small>입력값 · 소명 필요</small></td><td>' + won(x.extraLiving) + '</td></tr>';
+    rows += '<tr><td>월 실수령액</td><td>' + won(x.income) + '</td></tr>';
+    rows += '<tr class="sum"><td>월 가용소득<small>실수령액 − 생계비</small></td><td>' + won(r.disposable) + '</td></tr>';
+    rows += '<tr class="sum"><td>청산가치<small>지금 재산을 정리하면 채권자가 받을 수 있는 돈</small></td><td>' + won(r.liquidation) + '</td></tr>';
+    rows += '<tr><td>최저변제액<small>담보 없는 빚 ' + (x.unsecured < 5e7 ? '5천만원 미만: 5%' : '5천만원 이상: 3% + 100만원') + '</small></td><td>' + won(r.minRepay) + '</td></tr>';
+    if (x.priority) rows += '<tr><td>세금·4대보험 체납<small>전액 변제</small></td><td>' + won(x.priority) + '</td></tr>';
+    rows += '<tr class="sum"><td>최소로 갚아야 할 총액</td><td>' + won(r.requiredTotal) + '</td></tr>';
+    return '<details class="basis"><summary>어떻게 계산했는지 보기</summary><table>' + rows + '</table></details>';
+  }
+
+  function assetCard(r) {
+    var list = r.items.filter(function (it) { return it.gross > 0; });
+    var h = '<section class="r-card"><h2>재산, 꼭 팔아야 할까요?</h2><p class="sub">아니에요. 재산 가치(청산가치)만큼을 나눠 갚는 거예요.</p><div class="assets">';
+    h += '<div class="total"><span>계산에 넣은 청산가치</span><strong>' + approx(r.liquidation) + '</strong></div>';
+    if (list.length) {
+      h += '<ul>' + list.map(function (it) {
+        return '<li><span>' + esc(it.label) + (it.note ? '<small>' + esc(it.note) + (it.deduct ? ' (−' + approx(it.deduct) + ')' : '') + '</small>' : '') + '</span><b>' + approx(it.value) + '</b></li>';
+      }).join('') + '</ul>';
+    } else h += '<p class="empty">입력한 재산이 없어요. 보증금·보험·퇴직금이 빠지지 않았는지 확인해 주세요.</p>';
+    return h + '</div>' + basisTable(r) + '</section>';
+  }
+
+  function render(r) {
+    var x = r.input, flags = r.flags.map(function (f) { return NOTES[f]; }).filter(Boolean);
+    var head = '', hero = '', extra = [], h = '';
+    var mascot = '<div class="mascot"><img src="' + $('#intro .mascot img').src + '" alt="" width="150" height="150"></div>';
+
+    if (r.status === 'ok' || r.status === 'extended') {
+      head = '빚의 <span style="color:var(--purple)">' + Math.round(r.rate * 100) + '%</span>를<br>덜어낼 수 있어 보여요.';
+      hero = mascot + '<span class="status">개인회생으로 빚을 줄일 수 있어 보여요</span>' +
+        '<p class="label">예상 탕감액</p><div class="big" id="count-up" data-to="' + r.forgiven + '">0<small>원</small></div>' +
+        '<p class="say">담보 없는 빚 <b>' + approx(x.unsecured) + '</b> 중<br><b>약 ' + Math.round(r.rate * 100) + '%</b>가 줄어드는 계산이에요.</p>' +
+        '<div class="meter" role="img" aria-label="갚는 돈 ' + approx(r.paidGeneral) + ', 줄어드는 빚 ' + approx(r.forgiven) + '"><i style="width:' + (100 - r.rate * 100).toFixed(1) + '%"></i></div>' +
+        '<div class="meter-l"><span>갚는 돈 <b>' + approx(r.paidGeneral) + '</b></span><span>줄어드는 빚 <b class="p">' + approx(r.forgiven) + '</b></span></div>' +
+        '<dl class="stats"><div><dt>월 변제금</dt><dd>' + approx(r.monthly) + '</dd></div><div><dt>변제 기간</dt><dd>' + r.months + '개월</dd></div><div><dt>총 변제액</dt><dd>' + approx(r.total) + '</dd></div></dl>';
+      h += '<section class="r-card"><h2>이렇게 바뀌어요</h2><p class="sub">담보 없는 빚과 세금 체납 기준 · 담보대출 별도</p><div class="flow">' +
+        '<div class="before"><span>지금 갚아야 할 빚</span><strong>' + big(r.fullDebt) + '</strong></div><span class="arrow" aria-hidden="true">▼</span>' +
+        '<div class="after"><span>' + r.months + '개월 동안 실제로 갚는 돈</span><strong>' + big(r.total) + '</strong><em>매달 ' + approx(r.monthly) + '씩</em></div></div></section>';
+      if (r.status === 'extended') extra.push(msg('3년이 아니라 ' + r.months + '개월로 계산했어요', '가진 재산(청산가치)만큼은 갚아야 해서 기간을 늘렸어요. 3년을 넘기려면 법원이 인정할 사유가 필요해요.', true));
+    } else if (r.status === 'fullpay') {
+      head = '3년 안에 모두<br>갚을 수 있는 소득이에요.';
+      hero = mascot + '<span class="status info">3년 안에 다 갚을 수 있어요</span>' +
+        '<p class="say" style="margin-top:16px">생계비를 빼고도 <b>' + r.months + '개월</b>이면<br>빚 전부를 갚을 수 있는 계산이에요.</p>' +
+        '<dl class="stats"><div><dt>월 가용소득</dt><dd>' + approx(r.disposable) + '</dd></div><div><dt>전액 변제</dt><dd>' + r.months + '개월</dd></div><div><dt>갚을 빚</dt><dd>' + approx(r.fullDebt) + '</dd></div></dl>';
+      extra.push(msg('다른 방법과 비교해 보세요', '이 경우 개인회생으로 줄어드는 금액은 거의 없어요. 다만 이자가 멈추고 독촉이 중단되는 효과가 있어서, 신용회복위원회 채무조정 등과 비교해 보는 게 좋아요.'));
+    } else if (r.status === 'shortfall') {
+      head = '조건을 한 번 더<br>함께 살펴봐야 해요.';
+      hero = mascot + '<span class="status warm">변제 재원이 조금 부족해요</span>' +
+        '<p class="say" style="margin-top:16px">지금 소득으로는 5년 동안 갚아도<br>필요한 금액보다 <b style="color:var(--warm-ink)">월 ' + approx(r.gapMonthly) + '</b>이 모자라요.</p>' +
+        '<dl class="stats"><div><dt>월 가용소득</dt><dd>' + approx(r.disposable) + '</dd></div><div><dt>필요 월 변제금</dt><dd>' + approx(r.neededMonthly) + '</dd></div><div><dt>최소 변제 총액</dt><dd>' + approx(r.requiredTotal) + '</dd></div></dl>';
+      extra.push(msg(r.liquidation > r.minRepay ? '가진 재산만큼은 갚아야 해서예요' : '최저변제액을 채우기 어려워요',
+        r.liquidation > r.minRepay ? '청산가치 ' + approx(r.liquidation) + '만큼은 갚아야 해서 생긴 결과예요. 재산 평가를 다시 하거나 파산·재산 정리와 비교해 볼 수 있어요.' : '법이 정한 최저변제액을 채우기에 소득이 부족해요. 추가 생계비 조정이나 파산·면책과 비교해 볼 수 있어요.', true));
+    } else if (r.status === 'bankruptcy') {
+      head = '개인파산·면책을<br>먼저 검토해 보면 좋겠어요.';
+      hero = mascot + '<span class="status info">개인파산·면책 검토</span>' +
+        '<p class="say" style="margin-top:16px">' + (r.reason === 'noincome' ? '지금은 소득이 없어서' : '생계비를 빼면 남는 소득이 없어서') + '<br>개인회생보다 <b>파산·면책</b>이 맞을 수 있어요.</p>' +
+        '<dl class="stats"><div><dt>면책 검토 빚</dt><dd>' + approx(r.fullDebt) + '</dd></div><div><dt>기본 생계비</dt><dd>' + approx(r.living) + '</dd></div><div><dt>청산가치</dt><dd>' + approx(r.liquidation) + '</dd></div></dl>';
+      extra.push(msg('파산은 이런 절차예요', '재산을 정리하고 남은 빚을 면책받는 절차예요. 세금 등 일부 채무는 면책되지 않아요.'));
+    } else {
+      head = '입력한 빚이 없어요.';
+      hero = mascot + '<span class="status info">빚 금액을 다시 확인해 주세요</span>';
+    }
+
+    var msgs = extra.concat(flags.map(function (f) { return msg(f[0], f[1], f === NOTES.limit); }));
+    var out = '<div class="r-head"><span class="pill">나의 탕감액 리포트</span><h1>' + head + '</h1><p>입력한 내용으로 계산한 참고용 결과예요.</p>' +
+      '<div class="r-tools"><button type="button" data-act="edit">입력 수정</button><button type="button" data-act="copy">결과 복사</button><button type="button" data-act="print">인쇄 / PDF</button></div></div>' +
+      '<section class="r-card hero-r">' + hero + '</section>' + h;
+    if (msgs.length) out += '<section class="r-card"><h2>내 상황을 읽어드려요</h2><div class="msgs">' + msgs.join('') + '</div></section>';
+    if (r.status !== 'nodebt') out += assetCard(r);
+    out += '<section class="r-card cta-card"><div class="lawyer"><img src="data:image/webp;base64,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" alt="김준희 대표변호사" width="64" height="64"><div><b>이 결과, 변호사가<br>직접 검토해 드릴게요</b><small>법무법인 산음 · 대표변호사 김준희</small></div></div>' +
+      '<p class="cta-copy">실제 인정 생계비, 재산 평가, 관할 법원 실무까지 반영하면 금액이 달라질 수 있어요. 상담은 무료이고, 나눈 이야기는 비밀이 지켜져요.</p>' +
+      '<button type="button" class="primary" data-act="consult" style="margin-top:16px">무료로 검토받기</button>' +
+      '<div class="tel-row"><a href="tel:025734860"><small>서울 · 양재</small>02-573-4860</a><a href="tel:0323254864"><small>부천</small>032-325-4864</a></div></section>';
+    out += '<section class="r-card"><h2>상담 전에 준비하면 좋아요</h2><ul class="prep"><li><b>빚 자료</b>채권자별 원금·이자, 연체 기간, 최근 대출 내역</li><li><b>소득·가족 자료</b>급여명세서나 소득금액증명, 가족관계증명서</li><li><b>재산 자료</b>임대차계약서, 보험 해약환급금, 차량·부동산 시세</li></ul></section>';
+    out += '<button type="button" class="reset" data-act="reset">입력 내용을 모두 지우고 처음부터</button>';
+    out += '<div class="r-dock"><button type="button" class="primary" data-act="consult">무료로 검토받기</button><button type="button" class="ghost" data-act="edit">조건 바꿔서 다시 계산하기</button></div>';
+    result.innerHTML = out;
+    screen('result');
+    var c = $('#count-up'); if (c) countUp(c, Number(c.dataset.to));
+  }
+
+  function countUp(el, to) {
+    var target = Math.round(to / 1e4) * 1e4, t0 = null, dur = 1000;
+    if (reduceMotion) { el.innerHTML = big(target); return; }
+    function f(t) { if (!t0) t0 = t; var p = Math.min(1, (t - t0) / dur); el.innerHTML = big(target * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f); }
+    requestAnimationFrame(f);
+  }
+
+  function summary(r) {
+    var x = r.input, t = { salary: '직장 급여', business: '사업·프리랜서', irregular: '불규칙', none: '소득 없음' }[x.incomeType];
+    var lines = ['[탕감액 계산 결과]', '가구원 ' + x.household + '명 · ' + t + ' · 월 실수령 ' + approx(x.income),
+      '담보 없는 빚 ' + approx(x.unsecured) + (x.priority ? ' · 체납 ' + approx(x.priority) : '') + (r.secured ? ' · 담보대출 ' + approx(r.secured) : ''),
+      '청산가치 ' + approx(r.liquidation)];
+    if (r.status === 'ok' || r.status === 'extended') lines.push('예상: 월 ' + approx(r.monthly) + ' × ' + r.months + '개월, 탕감 약 ' + approx(r.forgiven) + ' (' + Math.round(r.rate * 100) + '%)');
+    else lines.push('결과: ' + { fullpay: '3년 내 전액 변제 가능', shortfall: '변제 재원 부족(월 ' + approx(r.gapMonthly || 0) + ')', bankruptcy: '파산·면책 검토', nodebt: '채무 없음' }[r.status]);
+    return lines.join('\n');
+  }
+
+  result.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var act = b.dataset.act;
+    if (act === 'edit') { screen('wizard'); go(0); }
+    else if (act === 'print') window.print();
+    else if (act === 'reset') reset();
+    else if (act === 'consult') openSheet();
+    else if (act === 'copy') copy(summary(last));
+  });
+
+  function copy(text) {
+    var done = function () { toast('결과를 복사했어요. 상담할 때 붙여 넣어 주세요.'); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+    function fallback() {
+      var t = document.createElement('textarea'); t.value = text; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); done(); } catch (err) { toast('복사하지 못했어요. 화면을 캡처해 주세요.'); }
+      t.remove();
+    }
+  }
+
+  function reset() {
+    form.reset();
+    $$('input[data-k]', form).forEach(hint);
+    last = null; result.innerHTML = '';
+    screen('intro'); go(0, false);
+  }
+
+  function sample() {
+    form.reset();
+    var data = { income: 270, unsecured: 8000, leaseDeposit: 5000, cash: 300 };
+    Object.keys(data).forEach(function (k) { setMoney($('[data-k="' + k + '"]', form), data[k]); });
+    $$('input[data-k]', form).forEach(hint);
+    compute();
+  }
+  $('#sample').addEventListener('click', sample);
+  $('#sample-intro').addEventListener('click', sample);
+
+  /* ---------- 토스트 ---------- */
+  var toastEl = $('#toast'), tt;
+  function toast(m) { toastEl.textContent = m; toastEl.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { toastEl.classList.remove('show'); }, 2800); }
+
+  /* ---------- 상담 신청 (FormSubmit, 홈페이지 상담 폼과 같은 주소) ----------
+   * 받는 주소를 바꾸려면 CONSULT_EMAIL만 수정하세요.
+   * 미리보기(claude.ai 등)에서는 실제로 보내지 않아요. */
+  var CONSULT_EMAIL = 'junheekim@sanmlaw.co.kr';
+  var PREVIEW = /claude\.ai$|claudeusercontent\.com$/.test(location.hostname) || location.protocol === 'file:';
+  var sheet = $('#sheet'), consult = $('#consult'), lastFocus = null;
+  function openSheet() {
+    lastFocus = document.activeElement;
+    var m = consult.elements.namedItem('msg');
+    if (last && m.value.indexOf('[탕감액 계산 결과]') < 0) m.value = summary(last) + (m.value ? '\n\n' + m.value : '');
+    $('#with-result').hidden = !last;
+    sheet.hidden = false; document.body.style.overflow = 'hidden';
+    setTimeout(function () { consult.elements.namedItem('name').focus(); }, 280);
+  }
+  function closeSheet() { sheet.hidden = true; document.body.style.overflow = ''; if (lastFocus) lastFocus.focus({ preventScroll: true }); }
+  $('#sheet-close').addEventListener('click', closeSheet);
+  sheet.addEventListener('click', function (e) { if (e.target === sheet) closeSheet(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+  var tel = consult.elements.namedItem('tel');
+  tel.addEventListener('input', function () { var d = tel.value.replace(/\D/g, '').slice(0, 11); tel.value = d.length < 4 ? d : d.length < 8 ? d.slice(0, 3) + '-' + d.slice(3) : d.slice(0, 3) + '-' + d.slice(3, d.length - 4) + '-' + d.slice(-4); });
+  consult.addEventListener('submit', function (e) {
+    e.preventDefault(); var el = consult.elements;
+    var name = el.namedItem('name').value.trim(), phone = el.namedItem('tel').value.trim();
+    if (!name) return toast('이름을 입력해 주세요.');
+    if (phone.replace(/\D/g, '').length < 10) return toast('연락처를 정확히 입력해 주세요.');
+    if (!el.namedItem('agree').checked) return toast('개인정보 수집·이용에 동의해 주세요.');
+    if (el.namedItem('_honey').value) return;
+    if (PREVIEW) return toast('미리보기 화면이라 실제로 발송되지는 않아요.');
+    var office = radio('office', consult) || '';
+    var btn = $('button[type="submit"]', consult), label = btn.textContent;
+    btn.disabled = true; btn.textContent = '보내는 중…';
+    fetch('https://formsubmit.co/ajax/' + CONSULT_EMAIL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: '[탕감액 계산기 상담신청] ' + name + ' / ' + office + '사무소',
+        _template: 'table',
+        '이름': name, '연락처': phone, '희망 사무소': office,
+        '상담 내용': el.namedItem('msg').value.trim() || '(없음)',
+        '접수 시각': new Date().toLocaleString('ko-KR'),
+        '접수 경로': location.href
+      })
+    }).then(function (res) { return res.json().then(function (j) { if (!res.ok || String(j.success) !== 'true') throw new Error(j.message || res.status); }); })
+      .then(function () { toast('신청이 접수됐어요. 곧 연락드릴게요.'); consult.reset(); closeSheet(); })
+      .catch(function () { toast('전송에 실패했어요. 02-573-4860으로 전화 주시면 바로 도와드릴게요.'); })
+      .then(function () { btn.disabled = false; btn.textContent = label; });
+  });
+
+  /* ---------- 휴대폰 키보드가 열려도 '다음' 버튼이 보이게 ---------- */
+  if (window.visualViewport) {
+    var frame = 0;
+    var refresh = function () {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(function () {
+        var a = document.activeElement, vv = window.visualViewport;
+        var editing = document.body.dataset.screen === 'wizard' && a && a.tagName === 'INPUT' && a.type !== 'radio';
+        var overlap = editing ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+        document.documentElement.style.setProperty('--kb', overlap > 100 ? Math.ceil(overlap) + 'px' : '0px');
+      });
+    };
+    window.visualViewport.addEventListener('resize', refresh);
+    window.visualViewport.addEventListener('scroll', refresh);
+    document.addEventListener('focusin', refresh);
+    document.addEventListener('focusout', refresh);
+  }
+
+  sync(); go(0, false);
+})();
+</script>
+</body>
+</html>
